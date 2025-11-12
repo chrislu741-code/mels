@@ -1,0 +1,87 @@
+# APTS - Advanced Penetration Testing System
+# Core Dependencies for Nation-State Level Penetration Testing
+
+# Beautiful Terminal Interface
+rich>=13.0.0
+
+# Async HTTP Client for Network Operations
+aiohttp>=3.8.0
+
+# System Information and Process Management
+psutil>=5.9.0
+
+# Cryptography for Military-Grade Encryption
+cryptography>=41.0.0
+
+# Advanced Compression Algorithms
+lz4>=4.3.0
+zstandard>=0.21.0
+blosc>=1.11.0
+
+# Network and DNS Operations
+dnspython>=2.4.0
+python-whois>=0.8.0
+
+# Tor Network Integration
+stem>=1.8.0
+PySocks>=1.7.0
+
+# Data Processing and Analysis
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# JSON Web Token Handling
+PyJWT>=2.8.0
+
+# Additional Security Libraries
+pycryptodome>=3.18.0
+paramiko>=3.3.0
+
+# Development and Testing (Optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Performance Monitoring
+memory-profiler>=0.61.0
+py-spy>=0.3.0
+
+# Database Connectivity (for target analysis)
+sqlalchemy>=2.0.0
+pymongo>=4.5.0
+redis>=4.6.0
+
+# Web Scraping and Automation
+selenium>=4.15.0
+playwright>=1.40.0
+
+# Network Security Tools
+scapy>=2.5.0
+python-nmap>=0.7.0
+
+# Machine Learning for AI Coordination
+scikit-learn>=1.3.0
+numpy>=1.24.0
+
+# Logging and Monitoring
+loguru>=0.7.0
+structlog>=23.1.0
+
+# Configuration Management
+pydantic>=2.4.0
+python-dotenv>=1.0.0
+
+# File Processing
+openpyxl>=3.1.0
+python-magic>=0.4.0
+
+# Network Protocols
+impacket>=0.11.0
+ldap3>=2.9.0
+
+# Cloud Security
+boto3>=1.29.0
+azure-identity>=1.14.0
+google-cloud-storage>=2.10.0
