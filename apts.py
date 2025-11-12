@@ -120,8 +120,12 @@ class APTSCore:
         ))
         
         try:
+            # Initialize AI Brain (3 Million+ Trained Scenarios)
+            console.print("[yellow]🧠 Initializing AI Brain with 3 million+ scenarios...[/yellow]")
+            await self._initialize_ai_brain()
+            
             # Initialize AI Coordinator
-            console.print("[yellow]🧠 Initializing AI Coordinator...[/yellow]")
+            console.print("[yellow]🤖 Initializing AI Coordinator...[/yellow]")
             self.ai_coordinator = await self._initialize_ai_coordinator()
             
             # Initialize Ghost Mode
@@ -149,6 +153,17 @@ class APTSCore:
             return False
         
         return True
+    
+    async def _initialize_ai_brain(self):
+        """Initialize AI Brain with 3 million+ trained scenarios"""
+        try:
+            from .core.pentest_ai_brain import initialize_ai_brain
+            await initialize_ai_brain()
+            self.logger.info("AI Brain initialized with 3 million+ scenarios")
+            console.print("[green]AI Brain ready with advanced decision-making capabilities[/green]")
+        except Exception as e:
+            self.logger.warning(f"AI Brain initialization failed: {e}")
+            console.print("[yellow]AI Brain unavailable - using fallback decision engine[/yellow]")
     
     async def _initialize_ai_coordinator(self):
         """Initialize AI Coordinator for framework management"""
@@ -303,8 +318,9 @@ APTS - Main Menu
 [5] 📊 View System Status
 [6] 📋 Generate Encrypted Report
 [7] 🛠️ Install/Update Frameworks
-[8] ⚙️ System Optimization
-[9] 🚪 Exit System
+[8] 🧠 AI Brain Statistics
+[9] ⚙️ System Optimization
+[10] 🚪 Exit System
 
 Current Status:
 • Ghost Mode: {ghost_status}
@@ -314,7 +330,7 @@ Current Status:
             
             console.print(Panel(menu, title="APTS Control Panel", border_style="cyan"))
             
-            choice = Prompt.ask("Select option (1-9)", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"])
+            choice = Prompt.ask("Select option (1-10)", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
             
             if choice == "1":
                 await self.ai_coordinated_testing()
@@ -331,8 +347,10 @@ Current Status:
             elif choice == "7":
                 await self.install_frameworks()
             elif choice == "8":
-                await self.system_optimization()
+                await self.show_ai_brain_stats()
             elif choice == "9":
+                await self.system_optimization()
+            elif choice == "10":
                 console.print("[yellow]👋 APTS shutdown by user[/yellow]")
                 self.shutdown()
                 break
@@ -429,6 +447,41 @@ Current Status:
         
         self.results = results
         console.print("[green]✅ Coordinated attack completed![/green]")
+    
+    async def show_ai_brain_stats(self):
+        """Show AI Brain statistics and capabilities"""
+        console.print(Panel.fit(
+            "[bold cyan]🧠 AI BRAIN STATISTICS[/bold cyan]",
+            border_style="cyan"
+        ))
+        
+        try:
+            from .core.pentest_ai_brain import get_ai_brain_stats
+            stats = await get_ai_brain_stats()
+            
+            table = Table(title="AI Brain Intelligence Report")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="green")
+            
+            table.add_row("Training Scenarios", f"{stats.get('scenarios', 0):,}")
+            table.add_row("Attack Patterns", f"{stats.get('patterns', 0):,}")
+            table.add_row("Vulnerability Types", f"{stats.get('vulnerabilities', 0):,}")
+            table.add_row("Success Rate", f"{stats.get('success_rate', 0):.1f}%")
+            table.add_row("Learning Iterations", f"{stats.get('iterations', 0):,}")
+            table.add_row("Decision Trees", f"{stats.get('decision_trees', 0):,}")
+            
+            console.print(table)
+            
+            console.print("\n[bold yellow]AI Brain Capabilities:[/bold yellow]")
+            console.print("• Target Analysis & Profiling")
+            console.print("• Attack Vector Prioritization")
+            console.print("• Exploit Chain Optimization")
+            console.print("• Real-time Decision Making")
+            console.print("• Adaptive Learning from Results")
+            console.print("• Pattern Recognition & Prediction")
+            
+        except Exception as e:
+            console.print(f"[red]❌ AI Brain statistics unavailable: {e}[/red]")
     
     async def view_system_status(self):
         """View comprehensive system status"""

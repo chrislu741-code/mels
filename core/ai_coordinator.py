@@ -18,6 +18,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import random
 import hashlib
+from .pentest_ai_brain import get_ai_brain, PentestAIBrain
 
 class AICoordinator:
     """
@@ -40,7 +41,10 @@ class AICoordinator:
         self.coordination_rules = {}
         self.quality_metrics = {}
         
-        # AI Decision Engine
+        # Initialize AI Brain - 3 Million+ Trained Scenarios
+        self.ai_brain = get_ai_brain()
+        
+        # AI Decision Engine (Enhanced with AI Brain)
         self.decision_engine = None
         self.strategy_analyzer = None
         self.result_processor = None
@@ -646,6 +650,117 @@ class AICoordinator:
         ])
         
         return steps
+    
+    # ============================================================================
+    # AI BRAIN INTEGRATION METHODS - 3 MILLION+ TRAINED SCENARIOS
+    # ============================================================================
+    
+    async def ai_analyze_target(self, target_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Use AI Brain to analyze target with 3 million+ trained scenarios"""
+        self.logger.info(f"🧠 AI Brain analyzing target: {target_info.get('domain', 'Unknown')}")
+        
+        try:
+            # Use AI Brain for intelligent analysis
+            ai_analysis = self.ai_brain.analyze_target(target_info)
+            
+            self.logger.info(f"✅ AI Brain analysis complete - Success probability: {ai_analysis['success_probability']:.2f}")
+            return ai_analysis
+            
+        except Exception as e:
+            self.logger.error(f"❌ AI Brain analysis failed: {e}")
+            # Fallback to basic analysis
+            return await self._basic_target_analysis(target_info)
+    
+    async def ai_make_attack_decision(self, target_analysis: Dict[str, Any], 
+                                    available_frameworks: List[str]) -> Dict[str, Any]:
+        """Use AI Brain to make intelligent attack decisions"""
+        self.logger.info("🎯 AI Brain making attack decision...")
+        
+        try:
+            # Use AI Brain for decision making
+            decision = self.ai_brain.make_attack_decision(target_analysis, available_frameworks)
+            
+            decision_dict = {
+                "framework": decision.framework,
+                "technique": decision.technique,
+                "parameters": decision.parameters,
+                "confidence": decision.confidence,
+                "expected_success": decision.expected_success,
+                "risk_level": decision.risk_level,
+                "execution_order": decision.execution_order
+            }
+            
+            self.logger.info(f"✅ AI Decision: {decision.framework}/{decision.technique} (confidence: {decision.confidence:.2f})")
+            return decision_dict
+            
+        except Exception as e:
+            self.logger.error(f"❌ AI Brain decision failed: {e}")
+            # Fallback to basic decision making
+            return await self._basic_attack_decision(target_analysis, available_frameworks)
+    
+    async def ai_learn_from_result(self, decision: Dict[str, Any], success: bool, 
+                                 execution_time: int, result_data: Dict[str, Any]):
+        """Feed results back to AI Brain for learning"""
+        self.logger.info(f"🧠 AI Brain learning from result: {'SUCCESS' if success else 'FAILURE'}")
+        
+        try:
+            # Convert decision dict back to AttackDecision object
+            from .pentest_ai_brain import AttackDecision
+            
+            attack_decision = AttackDecision(
+                framework=decision["framework"],
+                technique=decision["technique"],
+                parameters=decision["parameters"],
+                confidence=decision["confidence"],
+                expected_success=decision["expected_success"],
+                risk_level=decision["risk_level"],
+                execution_order=decision["execution_order"]
+            )
+            
+            # Feed result to AI Brain for learning
+            self.ai_brain.learn_from_result(attack_decision, success, execution_time, result_data)
+            
+            self.logger.info("✅ AI Brain learning complete")
+            
+        except Exception as e:
+            self.logger.error(f"❌ AI Brain learning failed: {e}")
+    
+    def get_ai_brain_stats(self) -> Dict[str, Any]:
+        """Get AI Brain statistics"""
+        try:
+            return self.ai_brain.get_ai_stats()
+        except Exception as e:
+            self.logger.error(f"❌ Failed to get AI Brain stats: {e}")
+            return {}
+    
+    async def _basic_target_analysis(self, target_info: Dict[str, Any]) -> Dict[str, Any]:
+        """Fallback basic target analysis when AI Brain fails"""
+        return {
+            "target_type": "web_application",
+            "predicted_vulnerabilities": ["sql_injection", "xss"],
+            "attack_surface": {"web_endpoints": [], "open_ports": []},
+            "ai_recommendations": ["Test for common vulnerabilities"],
+            "success_probability": 0.5,
+            "confidence_level": 0.3,
+            "estimated_time": 60,
+            "stealth_requirements": 5,
+            "recommended_frameworks": ["burp_suite"]
+        }
+    
+    async def _basic_attack_decision(self, target_analysis: Dict[str, Any], 
+                                   available_frameworks: List[str]) -> Dict[str, Any]:
+        """Fallback basic attack decision when AI Brain fails"""
+        framework = available_frameworks[0] if available_frameworks else "manual"
+        
+        return {
+            "framework": framework,
+            "technique": "basic_scan",
+            "parameters": {"timeout": 300},
+            "confidence": 0.3,
+            "expected_success": 0.5,
+            "risk_level": 5,
+            "execution_order": 1
+        }
 
 class DecisionEngine:
     """AI Decision Engine for framework selection and strategy"""
