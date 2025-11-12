@@ -157,7 +157,7 @@ class APTSCore:
     async def _initialize_ai_brain(self):
         """Initialize AI Brain with 3 million+ trained scenarios"""
         try:
-            from .core.pentest_ai_brain import initialize_ai_brain
+            from core.pentest_ai_brain import initialize_ai_brain
             await initialize_ai_brain()
             self.logger.info("AI Brain initialized with 3 million+ scenarios")
             console.print("[green]AI Brain ready with advanced decision-making capabilities[/green]")
@@ -167,7 +167,7 @@ class APTSCore:
     
     async def _initialize_ai_coordinator(self):
         """Initialize AI Coordinator for framework management"""
-        from .core.ai_coordinator import AICoordinator
+        from core.ai_coordinator import AICoordinator
         coordinator = AICoordinator()
         await coordinator.initialize()
         self.logger.info("🧠 AI Coordinator initialized")
@@ -175,7 +175,7 @@ class APTSCore:
     
     async def _initialize_ghost_mode(self):
         """Initialize Ghost Mode anonymization system"""
-        from .core.ghost_mode import GhostMode
+        from core.ghost_mode import GhostMode
         ghost = GhostMode()
         await ghost.initialize()
         self.logger.info("👻 Ghost Mode initialized")
@@ -456,7 +456,7 @@ Current Status:
         ))
         
         try:
-            from .core.pentest_ai_brain import get_ai_brain_stats
+            from core.pentest_ai_brain import get_ai_brain_stats
             stats = await get_ai_brain_stats()
             
             table = Table(title="AI Brain Intelligence Report")

@@ -18,7 +18,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import random
 import hashlib
-from .pentest_ai_brain import get_ai_brain, PentestAIBrain
+from core.pentest_ai_brain import get_ai_brain, PentestAIBrain
 
 class AICoordinator:
     """
@@ -705,7 +705,7 @@ class AICoordinator:
         
         try:
             # Convert decision dict back to AttackDecision object
-            from .pentest_ai_brain import AttackDecision
+            from core.pentest_ai_brain import AttackDecision
             
             attack_decision = AttackDecision(
                 framework=decision["framework"],
